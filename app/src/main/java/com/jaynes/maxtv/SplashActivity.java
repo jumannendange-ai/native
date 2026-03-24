@@ -34,7 +34,7 @@ public class SplashActivity extends AppCompatActivity {
 
         TextView tvVersion = findViewById(R.id.tv_version);
         if (tvVersion != null) {
-            tvVersion.setText("v" + BuildConfig.VERSION_NAME);
+            tvVersion.setText("v" + "1.0.0");
         }
 
         // Min splash delay
@@ -48,7 +48,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void callAppInit() {
-        ApiClient.appInit(BuildConfig.VERSION_NAME, new ApiClient.Callback() {
+        ApiClient.appInit("1.0.0", new ApiClient.Callback() {
             @Override public void onSuccess(JSONObject response) {
                 Log.d(TAG, "App init OK");
 

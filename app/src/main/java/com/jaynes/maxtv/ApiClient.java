@@ -113,7 +113,7 @@ public class ApiClient {
                 conn.setReadTimeout(TIMEOUT);
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept",       "application/json");
-                conn.setRequestProperty("X-App-Version", BuildConfig.VERSION_NAME);
+                conn.setRequestProperty("X-App-Version", "1.0.0");
                 if (token != null && !token.isEmpty()) {
                     conn.setRequestProperty("Authorization", "Bearer " + token);
                 }
@@ -141,7 +141,7 @@ public class ApiClient {
                 conn.setDoOutput(true);
                 conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
                 conn.setRequestProperty("Accept",       "application/json");
-                conn.setRequestProperty("X-App-Version", BuildConfig.VERSION_NAME);
+                conn.setRequestProperty("X-App-Version", "1.0.0");
                 if (token != null && !token.isEmpty()) {
                     conn.setRequestProperty("Authorization", "Bearer " + token);
                 }
