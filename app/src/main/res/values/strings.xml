@@ -1,34 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">JAYNES MAX TV</string>
-    <string name="tagline">Burudani ya Tanzania</string>
-
-    <!-- Login -->
-    <string name="login_title">Ingia</string>
-    <string name="register_title">Fungua Akaunti</string>
-    <string name="hint_email">Barua Pepe</string>
-    <string name="hint_password">Nywila</string>
-    <string name="btn_login">INGIA</string>
-    <string name="btn_register">FUNGUA AKAUNTI MPYA</string>
-
-    <!-- Main -->
-    <string name="all_channels">ZOTE</string>
-    <string name="loading">Inapakia…</string>
-    <string name="no_channels">Channels hazipatikani</string>
-    <string name="pull_refresh">Vuta kushughulikia upya</string>
-
-    <!-- Player -->
-    <string name="live_badge">LIVE</string>
-    <string name="btn_back">Rudi nyuma</string>
-    <string name="error_stream">Hitilafu ya stream</string>
-    <string name="need_subscription">Channel hii inahitaji subscription</string>
-
-    <!-- Menu -->
-    <string name="menu_logout">Toka</string>
-    <string name="menu_refresh">Sasisha</string>
-
-    <!-- Errors -->
-    <string name="error_network">Hitilafu ya mtandao</string>
-    <string name="error_invalid_email">Barua pepe si sahihi</string>
-    <string name="error_short_password">Nywila lazima iwe herufi 6+</string>
+    <string name="app_tagline">Stream · Live · Enjoy</string>
 </resources>

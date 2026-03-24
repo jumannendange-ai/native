@@ -1,24 +1,30 @@
-# ExoPlayer
--keep class com.google.android.exoplayer2.** { *; }
--dontwarn com.google.android.exoplayer2.**
+َ# JAYNES MAX TV — ProGuard Rules
 
-# OneSignal
--keep class com.onesignal.** { *; }
--dontwarn com.onesignal.**
+# Keep model classes
+-keep class com.jaynes.maxtv.models.** { *; }
+
+# OkHttp
+-dontwarn okhttp3.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
+# ExoPlayer / Media3
+-keep class androidx.media3.** { *; }
+-dontwarn androidx.media3.**
 
 # Firebase
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**
 
+# OneSignal
+-keep class com.onesignal.** { *; }
+-dontwarn com.onesignal.**
+
+# Gson
+-keep class com.google.gson.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
+
 # Glide
 -keep public class * implements com.bumptech.glide.module.GlideModule
--keep class * extends com.bumptech.glide.module.AppGlideModule { *; }
-
-# Keep model classes
--keep class com.jaynes.maxtv.Channel { *; }
-
-# JSON
--keepattributes *Annotation*
--keepclassmembers class * {
-    @org.json.* *;
-}
+-keep class com.bumptech.glide.** { *; }

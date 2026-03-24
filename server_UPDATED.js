@@ -58,11 +58,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
-    try {
-      if (!res.headersSent) {
-        res.setHeader('X-Response-Time', `${Date.now() - start}ms`);
-      }
-    } catch (e) {}
+    res.setHeader('X-Response-Time', `${Date.now() - start}ms`);
   });
   next();
 });
@@ -738,187 +734,122 @@ app.post('/api/config/maintenance', (req, res) => {
 });
 
 // ══════════════════════════════════════════════════
-//  ROUTE 8: AUTH — Login/Register via Supabase
-//  POST /api/auth  { action, email, password }
-//  action: "login" | "register" | "logout" | "me"
+//  ROUTE 8: AUTH — Native Android (login/register/reset)
+//  Proxy kwa Supabase — Android inaita hii moja kwa moja
 // ══════════════════════════════════════════════════
-const SUPABASE_URL     = process.env.SUPABASE_URL     || 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON    = process.env.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
-const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY || 'YOUR_SERVICE_KEY';
+const SUPABASE_URL         = 'https://dablnrggyfcddmdeiqxi.supabase.co';
+const SUPABASE_ANON_KEY    = process.env.SUPABASE_ANON_KEY    || 'sb_publishable_d8mzJ3iulCU7YdlV_lrdQw_32pOzDXc';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 
 app.post('/api/auth', async (req, res) => {
-  const { action, email, password, token } = req.body || {};
-  if (!action) return err(res, 400, 'action inahitajika', 'MISSING_ACTION');
+  const action = req.query.action || req.body.action || 'login';
+  const { email, password, name } = req.body;
+
+  // ── Validation ──────────────────────────────────
+  if (!email || !password) {
+    return err(res, 400, 'Email na nywila vinahitajika', 'MISSING_PARAM');
+  }
 
   try {
-    // ── LOGIN ──────────────────────────────────────
-    if (action === 'login') {
-      if (!email || !password) return err(res, 400, 'email na password vinahitajika', 'MISSING_PARAM');
+    // ── REGISTER ──────────────────────────────────
+    if (action === 'register') {
+      if (!name) return err(res, 400, 'Jina linahitajika', 'MISSING_PARAM');
+      if (password.length < 6) return err(res, 400, 'Nywila lazima iwe herufi 6+', 'WEAK_PASSWORD');
 
-      const r = await axios.post(
+      // Create user via Supabase Admin API
+      const signupRes = await axios.post(
+        `${SUPABASE_URL}/auth/v1/admin/users`,
+        { email, password, email_confirm: true, user_metadata: { full_name: name } },
+        { headers: { 'apikey': SUPABASE_SERVICE_KEY || SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY || SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' }, timeout: 12000 }
+      ).catch(e => ({ data: e.response?.data, status: e.response?.status }));
+
+      if (!signupRes.data?.id) {
+        const msg = signupRes.data?.message || signupRes.data?.msg || 'Usajili umeshindwa';
+        const friendly = msg.toLowerCase().includes('already') ? 'Email hii tayari imesajiliwa. Ingia badala yake.' : msg;
+        return err(res, 400, friendly, 'REGISTER_FAILED');
+      }
+
+      const uid = signupRes.data.id;
+      const trialEnd = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      // Create profile
+      await axios.post(
+        `${SUPABASE_URL}/rest/v1/profiles`,
+        { id: uid, email, full_name: name, plan: 'trial', trial_end: trialEnd, created_at: new Date().toISOString() },
+        { headers: { 'apikey': SUPABASE_SERVICE_KEY || SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY || SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }, timeout: 8000 }
+      ).catch(() => {});
+
+      // Login immediately
+      const loginRes = await axios.post(
         `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
         { email, password },
-        {
-          headers: {
-            'apikey':       SUPABASE_ANON,
-            'Content-Type': 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, timeout: 10000 }
+      ).catch(e => ({ data: e.response?.data }));
 
-      const d = r.data;
       return ok(res, {
-        token:         d.access_token,
-        refresh_token: d.refresh_token,
-        expires_in:    d.expires_in,
-        user: {
-          id:    d.user?.id,
-          email: d.user?.email,
-          name:  d.user?.user_metadata?.full_name || d.user?.email?.split('@')[0] || '',
-          role:  d.user?.role || 'user',
-          created_at: d.user?.created_at,
-        },
-        message: 'Umeingia kikamilifu!',
+        message: 'Umesajiliwa! Una dakika 30 za majaribio.',
+        user: { id: uid, email, name, plan: 'trial', trial_end: trialEnd, sub_end: '', created_at: new Date().toISOString() },
+        token:         loginRes.data?.access_token  || '',
+        refresh_token: loginRes.data?.refresh_token || '',
       });
     }
 
-    // ── REGISTER ───────────────────────────────────
-    if (action === 'register') {
-      if (!email || !password) return err(res, 400, 'email na password vinahitajika', 'MISSING_PARAM');
-
-      const r = await axios.post(
-        `${SUPABASE_URL}/auth/v1/signup`,
+    // ── LOGIN ──────────────────────────────────────
+    if (action === 'login') {
+      const loginRes = await axios.post(
+        `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
         { email, password },
-        {
-          headers: {
-            'apikey':       SUPABASE_ANON,
-            'Content-Type': 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, timeout: 10000 }
+      ).catch(e => ({ data: e.response?.data, status: e.response?.status }));
 
-      const d = r.data;
-      // Auto-login baada ya register
-      if (d.access_token) {
-        return ok(res, {
-          token:         d.access_token,
-          refresh_token: d.refresh_token,
-          expires_in:    d.expires_in,
-          user: {
-            id:    d.user?.id,
-            email: d.user?.email,
-            name:  d.user?.user_metadata?.full_name || d.user?.email?.split('@')[0] || '',
-            role:  'user',
-            created_at: d.user?.created_at,
-          },
-          message: 'Akaunti imefunguliwa!',
-        });
-      } else {
-        // Email confirmation inahitajika
-        return ok(res, {
-          token: null,
-          user:  { email: d.user?.email || email },
-          message: 'Akaunti imefunguliwa! Angalia email yako kuthibitisha.',
-          needs_confirmation: true,
-        });
+      if (!loginRes.data?.access_token) {
+        return err(res, 401, 'Email au nywila si sahihi', 'LOGIN_FAILED');
       }
-    }
 
-    // ── ME (verify token + subscription status) ────
-    if (action === 'me') {
-      if (!token) return err(res, 401, 'Token inahitajika', 'NO_TOKEN');
+      const token   = loginRes.data.access_token;
+      const refresh = loginRes.data.refresh_token || '';
+      const user    = loginRes.data.user || {};
+      const uid     = user.id || '';
+      const uname   = user.user_metadata?.full_name || name || email.split('@')[0];
 
-      const r = await axios.get(
-        `${SUPABASE_URL}/auth/v1/user`,
-        {
-          headers: {
-            'apikey':        SUPABASE_ANON,
-            'Authorization': `Bearer ${token}`,
-          },
-          timeout: 10000,
-        }
-      );
+      // Get profile
+      const profileRes = await axios.get(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${uid}&select=plan,trial_end,sub_end,created_at`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }, timeout: 8000 }
+      ).catch(() => ({ data: [] }));
 
-      const user = r.data;
-
-      // Angalia subscription kwenye profiles table
-      let subscription = { active: false, plan: null, expires_at: null };
-      try {
-        const profR = await axios.get(
-          `${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=subscription_active,subscription_plan,subscription_expires_at`,
-          {
-            headers: {
-              'apikey':        SUPABASE_SERVICE,
-              'Authorization': `Bearer ${SUPABASE_SERVICE}`,
-            },
-            timeout: 8000,
-          }
-        );
-        const prof = profR.data?.[0];
-        if (prof) {
-          const now = new Date();
-          const exp = prof.subscription_expires_at ? new Date(prof.subscription_expires_at) : null;
-          subscription = {
-            active:     !!(prof.subscription_active && exp && exp > now),
-            plan:       prof.subscription_plan || null,
-            expires_at: prof.subscription_expires_at || null,
-          };
-        }
-      } catch (e) {
-        // profiles fetch imeshindwa — subscription inaendelea kuwa false
-      }
+      const profile = profileRes.data?.[0] || {};
 
       return ok(res, {
         user: {
-          id:    user.id,
-          email: user.email,
-          name:  user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-          role:  user.role || 'user',
-          created_at: user.created_at,
+          id:         uid,
+          email,
+          name:       uname,
+          plan:       profile.plan      || 'free',
+          trial_end:  profile.trial_end || '',
+          sub_end:    profile.sub_end   || '',
+          created_at: profile.created_at || user.created_at || '',
         },
-        subscription,
-        message: 'Token ni sahihi',
+        token,
+        refresh_token: refresh,
       });
     }
 
-    // ── LOGOUT ─────────────────────────────────────
-    if (action === 'logout') {
-      if (token) {
-        try {
-          await axios.post(
-            `${SUPABASE_URL}/auth/v1/logout`,
-            {},
-            {
-              headers: {
-                'apikey':        SUPABASE_ANON,
-                'Authorization': `Bearer ${token}`,
-              },
-              timeout: 8000,
-            }
-          );
-        } catch (e) { /* logout errors hazizuii */ }
-      }
-      return ok(res, { message: 'Umetoka kikamilifu!' });
+    // ── RESET PASSWORD ────────────────────────────
+    if (action === 'reset_password') {
+      await axios.post(
+        `${SUPABASE_URL}/auth/v1/recover`,
+        { email },
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, timeout: 10000 }
+      ).catch(() => {});
+      return ok(res, { message: 'Barua ya kubadilisha nywila imetumwa kama email ipo.' });
     }
 
-    return err(res, 400, `action '${action}' haijulikani`, 'INVALID_ACTION');
+    return err(res, 400, 'Action haijulikani: ' + action, 'UNKNOWN_ACTION');
 
   } catch (e) {
-    const status  = e.response?.status || 500;
-    const errData = e.response?.data;
-
-    // Supabase error messages — tafsiri kwa Kiswahili
-    let msg = 'Hitilafu ya seva';
-    if (errData?.error_description?.includes('Invalid login')) msg = 'Barua pepe au nywila si sahihi';
-    else if (errData?.error_description?.includes('Email not confirmed')) msg = 'Thibitisha barua pepe kwanza';
-    else if (errData?.msg?.includes('already registered')) msg = 'Barua pepe hii tayari imesajiliwa';
-    else if (errData?.message) msg = errData.message;
-    else if (errData?.error_description) msg = errData.error_description;
-    else if (e.message) msg = e.message;
-
-    return err(res, status >= 400 && status < 600 ? status : 500, msg, 'AUTH_ERROR');
+    console.error('Auth error:', e.message);
+    return err(res, 500, 'Kosa la server: ' + e.message, 'SERVER_ERROR');
   }
 });
 

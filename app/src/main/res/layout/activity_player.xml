@@ -1,61 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/black">
 
-    <!-- ExoPlayer view — fullscreen -->
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:id="@+id/player_view"
+    <!-- ExoPlayer view -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- Loading overlay -->
+    <FrameLayout
+        android:id="@+id/loadingView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusable="true" />
+        android:background="#88000000"
+        android:gravity="center">
 
-    <!-- Custom overlay: back + title -->
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/primary"/>
+    </FrameLayout>
+
+    <!-- Top bar overlay -->
     <LinearLayout
-        android:id="@+id/overlay_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:background="#88000000"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="12dp"
-        android:background="#66000000">
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:gravity="center_vertical">
 
         <ImageButton
-            android:id="@+id/btn_back"
+            android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@android:drawable/ic_media_previous"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@android:color/white"
-            android:contentDescription="Rudi nyuma" />
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="@color/white"
+            android:contentDescription="Rudi"/>
 
         <TextView
-            android:id="@+id/tv_title"
+            android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@android:color/white"
+            android:text="Channel"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginStart="8dp"
-            android:ellipsize="end"
-            android:maxLines="1" />
+            android:paddingStart="12dp"
+            android:singleLine="true"
+            android:ellipsize="end"/>
 
         <!-- LIVE badge -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" LIVE "
-            android:textColor="#FFFFFF"
+            android:text="● LIVE"
             android:textSize="11sp"
+            android:textColor="@color/white"
             android:textStyle="bold"
-            android:background="#CCE8001D"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp" />
+            android:background="@color/primary"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"/>
 
     </LinearLayout>
 
