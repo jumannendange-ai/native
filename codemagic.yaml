@@ -22,14 +22,13 @@ workflows:
           mkdir -p gradle/wrapper
           curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
             "https://github.com/gradle/gradle/raw/v8.2.1/gradle/wrapper/gradle-wrapper.jar"
-          ls -lh gradle/wrapper/gradle-wrapper.jar
 
       - name: "Build Debug APK"
         script: |
           ./gradlew assembleDebug \
             --no-daemon \
-            --stacktrace \
-            -Porg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+            --info \
+            2>&1 | tail -100
 
     artifacts:
       - app/build/outputs/apk/debug/**.apk
