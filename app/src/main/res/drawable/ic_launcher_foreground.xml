@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  JAYNES MAX TV — App Icon Foreground
+  Replace this file with your actual icon PNG:
+    app/src/main/res/mipmap-mdpi/ic_launcher.png       (48x48)
+    app/src/main/res/mipmap-hdpi/ic_launcher.png       (72x72)
+    app/src/main/res/mipmap-xhdpi/ic_launcher.png      (96x96)
+    app/src/main/res/mipmap-xxhdpi/ic_launcher.png     (144x144)
+    app/src/main/res/mipmap-xxxhdpi/ic_launcher.png    (192x192)
+  
+  For now this is an adaptive icon using color + text.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#0A0A0F"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- Red accent arc top -->
+    <path
+        android:fillColor="#E8001D"
+        android:pathData="M10,10 Q54,0 98,10 L98,20 Q54,8 10,20 Z" />
+
+    <!-- "J" letter center -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,28 L62,28 L62,70 Q62,84 48,84 Q36,84 32,74 L40,69 Q42,76 48,76 Q54,76 54,70 L54,28 Z" />
+
+    <!-- Orange dot accent -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M64,32 A5,5 0 1,1 74,32 A5,5 0 1,1 64,32 Z" />
+
+</vector>
