@@ -2,6 +2,7 @@ package com.jaynes.maxtv;
 
 import android.content.Intent;
 import android.os.Bundle;
+import com.jaynes.maxtv.BuildConfig;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;

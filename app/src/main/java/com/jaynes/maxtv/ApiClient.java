@@ -1,6 +1,7 @@
 package com.jaynes.maxtv;
 
 import android.util.Log;
+import com.jaynes.maxtv.BuildConfig;
 
 import org.json.JSONObject;
 
