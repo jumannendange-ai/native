@@ -1,0 +1,34 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+
+# Android
+*.jks
+*.keystore
+local.properties
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/gradle/wrapper/gradle-wrapper.jar
+android/key.properties
+
+# IDE
+.idea/
+*.iws
+.DS_Store
+*.log
+
+# Assets (fonts downloaded at build time)
+assets/fonts/*.ttf
+!assets/fonts/.gitkeep
+
+# Env
+.env
+*.env

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext traffic kwa stream servers -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">195.178.110.0</domain>
+        <domain includeSubdomains="true">kinescopecdn.net</domain>
+        <domain includeSubdomains="true">bailatv.com</domain>
+        <domain includeSubdomains="true">zimotv.co.tz</domain>
+    </domain-config>
+    <!-- API server - HTTPS only -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">jaynes-max-tv-api.onrender.com</domain>
+        <domain includeSubdomains="true">dde.ct.ws</domain>
+        <domain includeSubdomains="true">mq.xo.je</domain>
+    </domain-config>
+    <!-- Default: allow all (kwa streams za different sources) -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>

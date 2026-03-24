@@ -1,0 +1,8 @@
+## Keystore config kwa signed release APK
+## Nakili file hii, rename kuwa key.properties, jaza maelezo yako
+## USIWEKE file hii GitHub!
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=jaynesmaxtv
+storeFile=../keystore/jaynes_release.jks

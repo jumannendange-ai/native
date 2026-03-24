@@ -1,0 +1,117 @@
+workflows:
+  android-release:
+    name: JAYNES MAX TV — Android Release
+    max_build_duration: 60
+    environment:
+      flutter: 3.22.0
+      java: 17
+      groups:
+        - keystore_credentials   # CM environment group (weka hii Codemagic dashboard)
+      vars:
+        PACKAGE_NAME: "com.jaynes.maxtv"
+        GOOGLE_PLAY_TRACK: internal
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> "$CM_BUILD_DIR/android/local.properties"
+          echo "flutter.versionName=1.0.0" >> "$CM_BUILD_DIR/android/local.properties"
+          echo "flutter.versionCode=$(($(date +%s)))" >> "$CM_BUILD_DIR/android/local.properties"
+
+      - name: Download fonts (BebasNeue + Rajdhani)
+        script: |
+          cd "$CM_BUILD_DIR"
+          # Bebas Neue
+          curl -L "https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wdhyzbi.woff2" -o /tmp/bebas.woff2 || true
+          # Download TTF from GitHub mirror
+          curl -L "https://github.com/google/fonts/raw/main/ofl/bebasneue/BebasNeue-Regular.ttf" \
+               -o assets/fonts/BebasNeue-Regular.ttf || \
+          curl -L "https://github.com/dharmatype/Bebas-Neue/raw/master/Fonts/BebasNeue(2018)ByDharmaType.zip" \
+               -o /tmp/bebas_pkg.zip && unzip -j /tmp/bebas_pkg.zip "*.ttf" -d assets/fonts/ || true
+          
+          # Rajdhani
+          for weight in Regular Medium SemiBold Bold; do
+            curl -L "https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-${weight}.ttf" \
+                 -o "assets/fonts/Rajdhani-${weight}.ttf" || true
+          done
+          
+          ls assets/fonts/
+
+      - name: Flutter pub get
+        script: |
+          flutter pub get
+
+      - name: Flutter analyze
+        script: |
+          flutter analyze --no-fatal-infos || true
+
+      - name: Build APK (release)
+        script: |
+          flutter build apk --release \
+            --build-name=1.0.0 \
+            --build-number=$(($(date +%s))) \
+            --dart-define=API_BASE=https://jaynes-max-tv-api.onrender.com
+
+      - name: Build AAB (for Play Store)
+        script: |
+          flutter build appbundle --release \
+            --build-name=1.0.0 \
+            --build-number=$(($(date +%s))) \
+            --dart-define=API_BASE=https://jaynes-max-tv-api.onrender.com
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+      - flutter_drive.log
+
+    publishing:
+      email:
+        recipients:
+          - jumannendange@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  android-debug:
+    name: JAYNES MAX TV — Debug Build
+    max_build_duration: 30
+    environment:
+      flutter: 3.22.0
+      java: 17
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> "$CM_BUILD_DIR/android/local.properties"
+          echo "flutter.versionName=1.0.0-debug" >> "$CM_BUILD_DIR/android/local.properties"
+          echo "flutter.versionCode=1" >> "$CM_BUILD_DIR/android/local.properties"
+
+      - name: Download fonts
+        script: |
+          cd "$CM_BUILD_DIR"
+          for weight in Regular Medium SemiBold Bold; do
+            curl -L "https://github.com/google/fonts/raw/main/ofl/rajdhani/Rajdhani-${weight}.ttf" \
+                 -o "assets/fonts/Rajdhani-${weight}.ttf" 2>/dev/null || true
+          done
+          curl -L "https://github.com/google/fonts/raw/main/ofl/bebasneue/BebasNeue-Regular.ttf" \
+               -o "assets/fonts/BebasNeue-Regular.ttf" 2>/dev/null || true
+
+      - name: Flutter pub get
+        script: flutter pub get
+
+      - name: Build Debug APK
+        script: flutter build apk --debug
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-debug.apk

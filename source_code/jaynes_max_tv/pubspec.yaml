@@ -1,0 +1,80 @@
+name: jaynes_max_tv
+description: JAYNES MAX TV — Tanzania Live TV Streaming (Native Android)
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP & Networking
+  dio: ^5.4.3
+  http: ^1.2.1
+
+  # Native Video Player (ExoPlayer) — HLS + DASH + ClearKey DRM
+  better_player: ^0.0.84
+
+  # State Management
+  provider: ^6.1.2
+
+  # Local Storage
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.0.0
+
+  # UI Components
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.10+1
+
+  # Push Notifications
+  onesignal_flutter: ^5.1.6
+
+  # Network info
+  connectivity_plus: ^6.0.3
+
+  # App info
+  package_info_plus: ^8.0.0
+  url_launcher: ^6.2.6
+
+  # Date formatting
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/icon.png"
+  adaptive_icon_background: "#0A0A0F"
+  adaptive_icon_foreground: "assets/images/icon.png"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: BebasNeue
+      fonts:
+        - asset: assets/fonts/BebasNeue-Regular.ttf
+          weight: 400
+
+    - family: Rajdhani
+      fonts:
+        - asset: assets/fonts/Rajdhani-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Rajdhani-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Rajdhani-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Rajdhani-Bold.ttf
+          weight: 700
