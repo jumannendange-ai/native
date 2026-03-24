@@ -23,7 +23,7 @@ android {
             signingConfig signingConfigs.debug // Badilisha na keystore yako
         }
         debug {
-            applicationIdSuffix ".debug"
+            
             debuggable true
         }
     }
