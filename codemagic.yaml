@@ -7,20 +7,29 @@ workflows:
     environment:
       java: 17
 
+    cache:
+      cache_paths:
+        - ~/.gradle/caches
+        - ~/.gradle/wrapper
+
     scripts:
-      - name: "Debug — angalia directory"
+      - name: "Setup local.properties"
         script: |
-          echo "PWD: $PWD"
-          echo "CM_BUILD_DIR: $CM_BUILD_DIR"
-          ls -la
-          ls -la $CM_BUILD_DIR
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: "Download gradle-wrapper.jar"
+        script: |
+          mkdir -p gradle/wrapper
+          curl -fsSL -o gradle/wrapper/gradle-wrapper.jar \
+            "https://github.com/gradle/gradle/raw/v8.2.1/gradle/wrapper/gradle-wrapper.jar"
+          ls -lh gradle/wrapper/gradle-wrapper.jar
 
       - name: "Build Debug APK"
         script: |
-          cd $CM_BUILD_DIR
-          ls -la
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --stacktrace \
+            -Porg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
     artifacts:
       - app/build/outputs/apk/debug/**.apk
