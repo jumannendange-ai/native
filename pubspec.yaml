@@ -14,8 +14,9 @@ dependencies:
   dio: ^5.4.3
   http: ^1.2.1
 
-  # Native Video Player (ExoPlayer) — HLS + DASH + ClearKey DRM
-  better_player: ^0.0.84
+  # Video Player
+  video_player: ^2.8.6
+  chewie: ^1.8.1
 
   # State Management
   provider: ^6.1.2
