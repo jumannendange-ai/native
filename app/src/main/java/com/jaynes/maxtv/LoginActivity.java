@@ -17,14 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-/**
- * LoginActivity — Pure native, calls /api/auth directly
- * Hakuna WebView, hakuna Google OAuth
- */
 public class LoginActivity extends AppCompatActivity {
 
     private EditText    etEmail, etPassword;
-    private Button      btnLogin, btnRegister;
+    private Button      btnLogin;
     private ProgressBar progress;
     private TextView    tvError;
 
@@ -38,7 +34,6 @@ public class LoginActivity extends AppCompatActivity {
 
         session = new SessionManager(this);
 
-        // Kama tayari ameingia — nenda MainActivity moja kwa moja
         if (session.isLoggedIn() && !session.getToken().isEmpty()) {
             goToMain();
             return;
@@ -47,15 +42,12 @@ public class LoginActivity extends AppCompatActivity {
         etEmail    = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         btnLogin   = findViewById(R.id.btn_login);
-        btnRegister= findViewById(R.id.btn_register);
         progress   = findViewById(R.id.progress);
         tvError    = findViewById(R.id.tv_error);
 
         btnLogin.setOnClickListener(v -> attemptLogin());
-        btnRegister.setOnClickListener(v -> attemptRegister());
     }
 
-    // ── Validation ────────────────────────────────────
     private boolean validate() {
         String email = etEmail.getText().toString().trim();
         String pass  = etPassword.getText().toString();
@@ -73,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    // ── Login ─────────────────────────────────────────
     private void attemptLogin() {
         if (!validate()) return;
         String email = etEmail.getText().toString().trim();
@@ -98,41 +89,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // ── Register ──────────────────────────────────────
-    private void attemptRegister() {
-        if (!validate()) return;
-        String email = etEmail.getText().toString().trim();
-        String pass  = etPassword.getText().toString();
-
-        setLoading(true);
-
-        ApiClient.register(email, pass, new ApiClient.Callback() {
-            @Override public void onSuccess(JSONObject response) {
-                mainHandler.post(() -> {
-                    setLoading(false);
-                    boolean needsConfirm = response.optBoolean("needs_confirmation", false);
-                    if (needsConfirm) {
-                        showError("Angalia barua pepe yako kuthibitisha akaunti");
-                    } else {
-                        session.saveSession(response);
-                        goToMain();
-                    }
-                });
-            }
-            @Override public void onError(String message, int httpCode) {
-                mainHandler.post(() -> {
-                    setLoading(false);
-                    showError(message);
-                });
-            }
-        });
-    }
-
-    // ── Helpers ───────────────────────────────────────
     private void setLoading(boolean loading) {
         progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnLogin.setEnabled(!loading);
-        btnRegister.setEnabled(!loading);
         if (loading) tvError.setVisibility(View.GONE);
     }
 
